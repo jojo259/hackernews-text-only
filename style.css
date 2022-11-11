@@ -1,9 +1,30 @@
+:root {
+	--comment-indent-width: 16px;
+}
+
+body {
+	color: #ddd;
+	background: #001118;
+	font-family: Arial;
+	
+	font-size: 18px;
+}
+
+a {
+	color: var(--main-bg-color);
+}
+
 .story {
   margin: 32px;
+  cursor: pointer;
 }
 
 .comment {
   margin: 32px;
+}
+
+.infodiv {
+	margin: 32px;
 }
 
 /* below from w3schools https://www.w3schools.com/howto/howto_css_split_screen.asp */

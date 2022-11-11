@@ -1,10 +1,13 @@
 console.log("running");
 
-let commentIndexWidth = 32;
+let commentIndexWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--comment-indent-width").replace("px", ""));
 
 initialLoad();
 
 let storiesDiv = document.getElementById("stories");
+
+let storyTitleDiv = document.getElementById("storytitle");
+let storyTextDiv = document.getElementById("storytext");
 let commentsDiv = document.getElementById("comments");
 
 async function getApi(urlPath) {
@@ -17,6 +20,12 @@ async function getApi(urlPath) {
 	});
 }
 
+function displayStory(curStory) { // also probably not xss safe
+	storyTitleDiv.innerHTML = curStory.title ? curStory.title : "notitle"; // HTML probably not necessary for titles
+	storyTitleDiv.href = curStory.url;
+	storyTextDiv.innerHTML = curStory.text ? curStory.text : ""; 
+}
+
 function getStoryElem(curStory) {
 	let storyDiv = document.createElement("div");
 
@@ -24,7 +33,8 @@ function getStoryElem(curStory) {
 
 	storyDiv.onclick = function() {
 		commentsDiv.innerHTML = "";
-		appendComments(curStory.kids, commentsDiv, 0)
+		appendComments(curStory.kids, commentsDiv, 0);
+		displayStory(curStory);
 	};
 
 	storyDiv.innerText += curStory.title;
@@ -42,7 +52,7 @@ function getCommentElem(curComment, atLevel) {
 	commentDiv.innerText += `${curComment.by} at ${curComment.time}`;
 
 	let commentTextDiv = document.createElement("div");
-	commentTextDiv.innerHTML = curComment.text; // not xss safe
+	commentTextDiv.innerHTML = !curComment.dead ? curComment.text : "deadcomment"; // not xss safe; nvm? comment with text `test<script>alert(1)</script>` didn't trigger
 	commentDiv.appendChild(commentTextDiv);
 
 	return commentDiv;
@@ -52,7 +62,7 @@ function appendComments(kidIds, toElement, atLevel) {
 	if (!kidIds) { return; };
 	for (let curKidId of kidIds) {
 		getApi(`item/${curKidId}.json`).then(curComment => {
-			if (curComment.dead) { return; };
+			if (curComment.deleted) { return; };
 
 			let newCommentElem = getCommentElem(curComment, atLevel);
 			toElement.appendChild(newCommentElem);
