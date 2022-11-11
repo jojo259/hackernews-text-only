@@ -72,11 +72,12 @@ function getCommentElem(curComment, atLevel) {
 
 	commentDiv.classList.add("comment");
 	commentDiv.id = "comment-" + curComment.id;
-	commentDiv.style.marginLeft = atLevel * commentIndexWidth + "px";
+	commentDiv.style.marginLeft = (atLevel + 1) * commentIndexWidth + "px";
 
-	commentDiv.innerText += `${curComment.by} ${prettyTimeStr(curComment.time)}`;
+	commentDiv.innerHTML += `<u>${curComment.by} ${prettyTimeStr(curComment.time)}</u>`; // also probably not xss safe but css is hard
 
 	let commentTextDiv = document.createElement("div");
+	commentTextDiv.style.marginTop = "4px";
 	commentTextDiv.innerHTML = !curComment.dead ? curComment.text : "deadcomment"; // not xss safe; nvm? comment with text `test<script>alert(1)</script>` didn't trigger
 	commentDiv.appendChild(commentTextDiv);
 
