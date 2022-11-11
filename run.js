@@ -9,6 +9,7 @@ initialLoad();
 let storiesDiv = document.getElementById("stories");
 
 let storyTitleDiv = document.getElementById("storytitle");
+let storyInfoDiv = document.getElementById("storyinfo");
 let storyTextDiv = document.getElementById("storytext");
 let commentsDiv = document.getElementById("comments");
 
@@ -25,7 +26,12 @@ async function getApi(urlPath) {
 function displayStory(curStory) { // also probably not xss safe
 	storyTitleDiv.innerHTML = curStory.title ? curStory.title : "notitle"; // HTML probably not necessary for titles
 	storyTitleDiv.href = curStory.url;
+	storyInfoDiv.innerText = getStoryInfo(curStory);
 	storyTextDiv.innerHTML = curStory.text ? curStory.text : ""; 
+}
+
+function getStoryInfo(curStory) {
+	return `${curStory.score} points by ${curStory.by} ${prettyTimeStr(curStory.time)} | ${curStory.descendants ? curStory.descendants : "0"} comments`
 }
 
 function getStoryElem(curStory) {
@@ -40,7 +46,7 @@ function getStoryElem(curStory) {
 	};
 
 	storyDiv.innerText += curStory.title;
-	storyDiv.innerText += `\n${curStory.score} points by ${curStory.by} ${prettyTimeStr(curStory.time)} | ${curStory.descendants ? curStory.descendants : "0"} comments`;
+	storyDiv.innerText += "\n" + getStoryInfo(curStory);
 
 	return storyDiv;
 }
@@ -79,7 +85,7 @@ function initialLoad() {
 	getApi("topstories.json").then(topStories => {
 	console.log(`got ${topStories.length} top stories`);
 
-	for (let curStoryId of topStories.slice(0, 500)) {
+	for (let curStoryId of topStories.slice(0, 50)) {
 			getApi(`item/${curStoryId}.json`).then(curStory => {
 				storiesDiv.appendChild(getStoryElem(curStory));
 				console.log(`added story by ${curStory.by}`);
