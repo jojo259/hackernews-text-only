@@ -13,6 +13,20 @@
 	</head>
 	<body>
 		<div id="leftpane" class="split left">
+			<div class="navbuttonscontainer">
+				<span class="sorter" onclick="curSortingType='top';reloadStories()">
+					Top
+				</span>
+				<span class="sorter" onclick="curSortingType='best';reloadStories()">
+					Best
+				</span>
+				<span class="sorter" onclick="curSortingType='new';reloadStories()">
+					New
+				</span>
+				<a class="githublink" href="https://github.com/jojo259/hackernews-text-only">
+					GitHub
+				</a>
+			</div>
 			<div id="stories">
 
 			</div>
@@ -29,7 +43,7 @@
 			<div id="storytext" class="infodiv">
 
 			</div>
-			<div id="comments">
+			<div id="comments" class="infodiv">
 
 			</div>
 		</div>

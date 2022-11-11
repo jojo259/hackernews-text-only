@@ -13,6 +13,10 @@ a {
 	color: var(--main-bg-color);
 }
 
+.sorter {
+	cursor: pointer;
+}
+
 .story {
   margin: 32px;
   cursor: pointer;
@@ -24,6 +28,15 @@ a {
 
 .infodiv {
 	margin: 32px;
+}
+
+.navbuttonscontainer {
+	margin-left: 32px;
+	margin-right: 32px;
+}
+
+.githublink {
+	float: right;
 }
 
 /*
