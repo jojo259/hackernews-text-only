@@ -15,6 +15,8 @@ let commentsDiv = document.getElementById("comments");
 
 let curSortingType = "top";
 
+let cachedReqs = {};
+
 readHash();
 
 reloadStories(curSortingType, true);
@@ -183,11 +185,20 @@ function readHash() {
 }
 
 async function getApi(urlPath) {
+	//console.log(cachedReqs);
+	if (cachedReqs[urlPath] != undefined) {
+		//console.log("returning cached");
+		return cachedReqs[urlPath];
+	}
+
+	//console.log(`${urlPath} not in cachedReqs`)
+
 	let fullUrl = "https://hacker-news.firebaseio.com/v0/" + urlPath;
 
 	return fetch(fullUrl)
 	.then((response) => response.json())
 	.then((apiData) => {
+		cachedReqs[urlPath] = apiData;
 		return apiData;
 	});
 }
