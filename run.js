@@ -1,3 +1,5 @@
+"use strict"
+
 console.log("running");
 
 let commentIndexWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--comment-indent-width").replace("px", ""));
@@ -38,7 +40,7 @@ function getStoryElem(curStory) {
 	};
 
 	storyDiv.innerText += curStory.title;
-	storyDiv.innerText += `\n${curStory.score} points by ${curStory.by} | ${curStory.descendants ? curStory.descendants : "0"} comments`;
+	storyDiv.innerText += `\n${curStory.score} points by ${curStory.by} ${prettyTimeStr(curStory.time)} | ${curStory.descendants ? curStory.descendants : "0"} comments`;
 
 	return storyDiv;
 }
@@ -49,7 +51,7 @@ function getCommentElem(curComment, atLevel) {
 	commentDiv.classList.add("comment");
 	commentDiv.style.marginLeft = (atLevel + 1) * commentIndexWidth + "px";
 
-	commentDiv.innerText += `${curComment.by} at ${curComment.time}`;
+	commentDiv.innerText += `${curComment.by} ${prettyTimeStr(curComment.time)}`;
 
 	let commentTextDiv = document.createElement("div");
 	commentTextDiv.innerHTML = !curComment.dead ? curComment.text : "deadcomment"; // not xss safe; nvm? comment with text `test<script>alert(1)</script>` didn't trigger
@@ -77,11 +79,55 @@ function initialLoad() {
 	getApi("topstories.json").then(topStories => {
 	console.log(`got ${topStories.length} top stories`);
 
-	for (let curStoryId of topStories.slice(0, 50)) {
+	for (let curStoryId of topStories.slice(0, 500)) {
 			getApi(`item/${curStoryId}.json`).then(curStory => {
 				storiesDiv.appendChild(getStoryElem(curStory));
 				console.log(`added story by ${curStory.by}`);
 			});
 		}
 	});
+}
+
+function prettyTimeStr(givenEpoch) {
+	let curEpoch = Date.now() / 1000;
+
+	let timeDiff = Math.abs(givenEpoch - curEpoch);
+
+	let timeWord = "";
+
+	if (timeDiff < 1) {
+		return "right now";
+	}
+	else if (timeDiff < 60) { // minute
+		timeWord = "second";
+	}
+	else if (timeDiff < 3600) { // hour
+		timeWord = "minute";
+		timeDiff /= 60;
+	}
+	else if (timeDiff < 86400) { // day
+		timeWord = "hour";
+		timeDiff /= 3600;
+	}
+	else if (timeDiff < 2678400) { // month
+		timeWord = "day";
+		timeDiff /= 86400;
+	}
+	else if (timeDiff < 31536000) { // year
+		timeWord = "month";
+		timeDiff /= 2678400;
+	}
+
+	timeDiff = Math.floor(timeDiff);
+
+	if (timeDiff > 1) {
+		timeWord += "s";
+	}
+
+	if (givenEpoch > curEpoch) {
+		return `in ${timeDiff} ${timeWord}`
+	}
+	else {
+		return `${timeDiff} ${timeWord} ago`
+	}
 }
