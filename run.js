@@ -14,6 +14,7 @@ let storyTitleDiv = document.getElementById("storytitle");
 let storyInfoDiv = document.getElementById("storyinfo");
 let storyTextDiv = document.getElementById("storytext");
 let commentsDiv = document.getElementById("comments");
+let rightPaneDiv = document.getElementById("rightpane");
 
 let curSortingType = "top";
 
@@ -49,6 +50,7 @@ function displayStory(curStory) { // also probably not xss safe
 	storyTitleDiv.href = curStory.url;
 	storyInfoDiv.innerText = getStoryInfo(curStory);
 	storyTextDiv.innerHTML = curStory.text ? curStory.text : "";
+	rightPaneDiv.scrollTop = 0;
 }
 
 function getStoryInfo(curStory) {
