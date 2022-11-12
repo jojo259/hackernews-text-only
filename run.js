@@ -2,6 +2,8 @@
 
 console.log("running");
 
+let maxCacheMinutes = 5;
+
 let atStoryId = 0;
 let atCommentId = 0;
 
@@ -185,20 +187,18 @@ function readHash() {
 }
 
 async function getApi(urlPath) {
-	//console.log(cachedReqs);
 	if (cachedReqs[urlPath] != undefined) {
-		//console.log("returning cached");
-		return cachedReqs[urlPath];
+		if (Date.now() - cachedReqs[urlPath].time < maxCacheMinutes * 60 * 1000) {
+			return cachedReqs[urlPath].data;
+		}
 	}
-
-	//console.log(`${urlPath} not in cachedReqs`)
 
 	let fullUrl = "https://hacker-news.firebaseio.com/v0/" + urlPath;
 
 	return fetch(fullUrl)
 	.then((response) => response.json())
 	.then((apiData) => {
-		cachedReqs[urlPath] = apiData;
+		cachedReqs[urlPath] = {data: apiData, time: Date.now()};
 		return apiData;
 	});
 }
