@@ -44,7 +44,7 @@ function reloadStories(openHashStory = false) {
 	if (atStoryId != 0 && openHashStory) { // has story in hash
 		getApi(`item/${atStoryId}.json`).then(curStory => { // doesn't matter that this fetch may be redundant as it would just be cached anyway
 			console.log("attempting to open story from hash")
-			openStory(curStory);
+			openStory(curStory, true);
 		});
 	}
 }
@@ -99,6 +99,11 @@ function getCommentElem(curComment, atDepth) {
 	commentDiv.id = "comment-" + curComment.id;
 	commentDiv.style.marginLeft = (atDepth + 1) * commentIndexWidth + "px";
 
+	commentDiv.onmouseover = function() {
+		atCommentId = curComment.id;
+		updateHash();
+	};
+
 	commentDiv.innerHTML += `<u>${curComment.by} ${prettyTimeStr(curComment.time)}</u>`; // also probably not xss safe but css is hard
 
 	let commentTextDiv = document.createElement("div");
@@ -109,12 +114,10 @@ function getCommentElem(curComment, atDepth) {
 	return commentDiv;
 }
 
-function openStory(curStory) {
-	let hashAtCommentId = getHashKey("atcomment"); // unused
-
+function openStory(curStory, scrollToHashComment = false) {
 	if (curStory.kids) {
 		commentsDiv.innerHTML = "";
-		appendComments(curStory.kids, commentsDiv, 0)
+		appendComments(curStory.kids, commentsDiv.appendChild(document.createElement("div")), 0, scrollToHashComment)
 	}
 	else {
 		commentsDiv.innerHTML = "No comments.";
@@ -124,17 +127,25 @@ function openStory(curStory) {
 	updateHash();
 }
 
-function appendComments(kidIds, toElement, atLevel) {
+function appendComments(kidIds, toElement, atDepth, scrollToHashComment = false) {
 	if (!kidIds) { return; };
 	for (let curKidId of kidIds.reverse()) { // reversed because changing from `appendChild` to `after` made the comments reversed idk why
+		let placeholderCommentDiv = document.createElement("div");
+		toElement.after(placeholderCommentDiv)
 		getApi(`item/${curKidId}.json`).then(curComment => {
 			if (curComment.deleted) { return; };
 
-			let newCommentElem = getCommentElem(curComment, atLevel);
-			toElement.after(newCommentElem);
-			console.log(`added comment by ${curComment.by}`);
+			let newCommentElem = getCommentElem(curComment, atDepth);
+			placeholderCommentDiv.replaceWith(newCommentElem);
+			if (scrollToHashComment && curKidId == atCommentId) {
+				setTimeout(function() { // delay to allow rendering to occur before scroll attempted (not really a robust solution)
+					newCommentElem.scrollIntoView();
+					console.log("scrolled to comment");
+				}, 1000);
+			}
+			console.log(`added comment at depth ${atDepth} by ${curComment.by}`);
 
-			appendComments(curComment.kids, newCommentElem, atLevel + 1);
+			appendComments(curComment.kids, newCommentElem, atDepth + 1, scrollToHashComment);
 		});
 	}
 }
@@ -204,6 +215,12 @@ function readHash() {
 	if (hashAtStoryId) {
 		console.log(`hash at story ${hashAtStoryId}`);
 		atStoryId = parseInt(hashAtStoryId);
+	}
+
+	let hashAtCommentId = getHashKey("atcomment");
+	if (hashAtCommentId) {
+		console.log(`hash at comment ${hashAtCommentId}`);
+		atCommentId = parseInt(hashAtCommentId);
 	}
 }
 
