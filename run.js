@@ -38,7 +38,7 @@ function reloadStories(openHashStory = false) {
 		storiesArray = newStoriesArray;
 		atStoryInd = 0;
 
-		loadStories(atStoryInd, atStoryInd + storiesPerLoad - 1);
+		loadStories(atStoryInd, atStoryInd + storiesPerLoad);
 	});
 
 	if (atStoryId != 0 && openHashStory) { // has story in hash
@@ -126,12 +126,12 @@ function openStory(curStory) {
 
 function appendComments(kidIds, toElement, atLevel) {
 	if (!kidIds) { return; };
-	for (let curKidId of kidIds) {
+	for (let curKidId of kidIds.reverse()) { // reversed because changing from `appendChild` to `after` made the comments reversed idk why
 		getApi(`item/${curKidId}.json`).then(curComment => {
 			if (curComment.deleted) { return; };
 
 			let newCommentElem = getCommentElem(curComment, atLevel);
-			toElement.appendChild(newCommentElem);
+			toElement.after(newCommentElem);
 			console.log(`added comment by ${curComment.by}`);
 
 			appendComments(curComment.kids, newCommentElem, atLevel + 1);
