@@ -4,6 +4,8 @@ console.log("running");
 
 let maxCacheMinutes = 5;
 
+let storiesPerLoad = 20;
+
 let atStoryId = 0;
 let atCommentId = 0;
 
@@ -20,29 +22,46 @@ let curSortingType = "top";
 
 let cachedReqs = {};
 
+let storiesArray = [];
+let atStoryInd = 0;
+
 readHash();
 
-reloadStories(curSortingType, true);
+reloadStories(true);
 
-function reloadStories(scrollToCur = false) {
+function reloadStories(openHashStory = false) {
 	updateHash();
 	storiesDiv.innerHTML = "";
-	getApi(curSortingType + "stories.json").then(topStories => {
-		console.log(`got ${topStories.length} top story ids`);
+	getApi(curSortingType + "stories.json").then(newStoriesArray => {
+		console.log(`got ${newStoriesArray.length} top story ids`);
 
-		for (let curStoryId of topStories.slice(0, 50)) {
-			getApi(`item/${curStoryId}.json`).then(curStory => {
-				let curStoryElem = getStoryElem(curStory);
-				storiesDiv.appendChild(curStoryElem);
-				if (scrollToCur && curStory.id == atStoryId) {
-					console.log("scrolling to and opening story from hash")
-					curStoryElem.scrollIntoView();
-					openStory(curStory);
-				}
-				console.log(`added story by ${curStory.by}`);
-			});
-		};
+		storiesArray = newStoriesArray;
+		atStoryInd = 0;
+
+		loadStories(atStoryInd, atStoryInd + storiesPerLoad - 1);
 	});
+
+	if (atStoryId != 0 && openHashStory) { // has story in hash
+		getApi(`item/${atStoryId}.json`).then(curStory => { // doesn't matter that this fetch may be redundant as it would just be cached anyway
+			console.log("attempting to open story from hash")
+			openStory(curStory);
+		});
+	}
+}
+
+function loadMoreStories() {
+	atStoryInd += storiesPerLoad;
+	loadStories(atStoryInd, atStoryInd + storiesPerLoad);
+}
+
+function loadStories(storyFrom, storyTo) {
+	for (let curStoryId of storiesArray.slice(storyFrom, storyTo)) {
+		getApi(`item/${curStoryId}.json`).then(curStory => {
+			let curStoryElem = getStoryElem(curStory);
+			storiesDiv.appendChild(curStoryElem);
+			console.log(`added story by ${curStory.by}`);
+		});
+	};
 }
 
 function displayStory(curStory) { // also probably not xss safe
@@ -73,12 +92,12 @@ function getStoryElem(curStory) {
 	return storyDiv;
 }
 
-function getCommentElem(curComment, atLevel) {
+function getCommentElem(curComment, atDepth) {
 	let commentDiv = document.createElement("div");
 
 	commentDiv.classList.add("comment");
 	commentDiv.id = "comment-" + curComment.id;
-	commentDiv.style.marginLeft = (atLevel + 1) * commentIndexWidth + "px";
+	commentDiv.style.marginLeft = (atDepth + 1) * commentIndexWidth + "px";
 
 	commentDiv.innerHTML += `<u>${curComment.by} ${prettyTimeStr(curComment.time)}</u>`; // also probably not xss safe but css is hard
 
@@ -91,7 +110,7 @@ function getCommentElem(curComment, atLevel) {
 }
 
 function openStory(curStory) {
-	let hashAtCommentId = getHashKey("atcomment"); // unushed
+	let hashAtCommentId = getHashKey("atcomment"); // unused
 
 	if (curStory.kids) {
 		commentsDiv.innerHTML = "";
@@ -124,7 +143,7 @@ function updateHash() {
 	window.location.hash = `atstory=${atStoryId}&atcomment=${atCommentId}&sorting=${curSortingType}`;
 }
 
-function getHashKey(getKey) { // works fine when all parameter values dont have special chars which they currently don't
+function getHashKey(getKey) { // works fine when all parameter values are super regular
 	if (window.location.hash.includes(getKey)) {
 		return window.location.hash.split(getKey + "=")[1].split("&")[0];
 	}

@@ -13,7 +13,17 @@ a {
 	color: var(--main-bg-color);
 }
 
+#leftpane {
+	overflow:scroll
+}
+
 .sorter {
+	cursor: pointer;
+}
+
+.loadmorebutton {
+	margin-left: 32px;
+	margin-bottom: 32px;
 	cursor: pointer;
 }
 
