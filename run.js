@@ -25,8 +25,6 @@ let rightPaneDiv = document.getElementById("rightpane");
 
 let curSortingType = "top";
 
-let cachedReqs = {};
-
 let storiesArray = [];
 let atStoryInd = 0;
 
@@ -266,9 +264,12 @@ function readHash() {
 }
 
 async function getApi(urlPath) {
-	if (cachedReqs[urlPath] != undefined) {
-		if (Date.now() - cachedReqs[urlPath].time < maxCacheMinutes * 60 * 1000) {
-			return cachedReqs[urlPath].data;
+	console.log(window.localStorage)
+	let gotCacheStr = window.localStorage.getItem("cache-" + urlPath);
+	if (gotCacheStr != undefined) {
+		let gotCacheJson = JSON.parse(gotCacheStr);
+		if (Date.now() - gotCacheJson.time < maxCacheMinutes * 60 * 1000) {
+			return gotCacheJson.data;
 		}
 	}
 
@@ -277,7 +278,7 @@ async function getApi(urlPath) {
 	return fetch(fullUrl)
 	.then((response) => response.json())
 	.then((apiData) => {
-		cachedReqs[urlPath] = {data: apiData, time: Date.now()};
+		window.localStorage.setItem("cache-" + urlPath, JSON.stringify({data: apiData, time: Date.now()}));
 		return apiData;
 	});
 }
@@ -290,17 +291,17 @@ function setCookie(cname, cvalue) { // from w3schools
 }
 
 function getCookie(cname) { // from w3schools
-  let name = cname + "=";
-  let decodedCookie = decodeURIComponent(document.cookie);
-  let ca = decodedCookie.split(';');
-  for(let i = 0; i <ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return "";
+	let name = cname + "=";
+	let decodedCookie = decodeURIComponent(document.cookie);
+	let ca = decodedCookie.split(';');
+	for(let i = 0; i <ca.length; i++) {
+		let c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
 }
