@@ -11,6 +11,11 @@ let atCommentId = 0;
 
 let commentIndexWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--comment-indent-width").replace("px", ""));
 
+let darkModeColorText = getComputedStyle(document.documentElement).getPropertyValue("--dark-mode-color-text");
+let darkModeColorBackground = getComputedStyle(document.documentElement).getPropertyValue("--dark-mode-color-bg");
+let lightModeColorText = getComputedStyle(document.documentElement).getPropertyValue("--light-mode-color-text");
+let lightModeColorBackground = getComputedStyle(document.documentElement).getPropertyValue("--light-mode-color-bg");
+
 let storiesDiv = document.getElementById("stories");
 let storyTitleDiv = document.getElementById("storytitle");
 let storyInfoDiv = document.getElementById("storyinfo");
@@ -24,6 +29,10 @@ let cachedReqs = {};
 
 let storiesArray = [];
 let atStoryInd = 0;
+
+let darkModeSetting = true;
+
+checkDarkModeSettings();
 
 readHash();
 
@@ -57,16 +66,14 @@ function loadMoreStories() {
 function loadStories(storyFrom, storyTo) {
 	let getApiPromises = [];
 	for (let curStoryId of storiesArray.slice(storyFrom, storyTo)) {
-		getApiPromises.push(getApi(`item/${curStoryId}.json`));
-	}
-
-	Promise.all(getApiPromises).then(gotStories => {
-		for (let curStory of gotStories) {
+		let placeholderDiv = document.createElement("div");
+		storiesDiv.appendChild(placeholderDiv);
+		getApi(`item/${curStoryId}.json`).then(curStory => {
 			let curStoryElem = getStoryElem(curStory);
-			storiesDiv.appendChild(curStoryElem);
+			placeholderDiv.replaceWith(curStoryElem);
 			console.log(`added story by ${curStory.by}`);
-		}
-	});
+		});
+	}
 }
 
 function displayStory(curStory) { // also probably not xss safe
@@ -209,6 +216,35 @@ function prettyTimeStr(givenEpoch) {
 	}
 }
 
+function checkDarkModeSettings() {
+	if (getCookie("darkmode") == "true") {
+		darkModeSetting = true;
+	}
+	else if (getCookie("darkmode") == "false") {
+		darkModeSetting = false;
+	}
+	updatePageAppearance()
+}
+
+function toggleDarkMode() {
+	darkModeSetting = !darkModeSetting;
+	setCookie("darkmode", darkModeSetting ? "true" : "false");
+	updatePageAppearance();
+	console.log(`toggled dark mode to ${darkModeSetting}`);
+}
+
+function updatePageAppearance() {
+	if (darkModeSetting) {
+		document.body.style.color = darkModeColorText;
+		document.body.style.backgroundColor = darkModeColorBackground;
+	}
+	else {
+		document.body.style.color = lightModeColorText;
+		document.body.style.backgroundColor = lightModeColorBackground;
+	}
+	console.log(`dark mode set to ${darkModeSetting}`);
+}
+
 function readHash() {
 	let hashSortingType = getHashKey("sorting");
 	if (hashSortingType) {
@@ -244,4 +280,27 @@ async function getApi(urlPath) {
 		cachedReqs[urlPath] = {data: apiData, time: Date.now()};
 		return apiData;
 	});
+}
+
+function setCookie(cname, cvalue) { // from w3schools
+	const d = new Date();
+	d.setTime(d.getTime() + (365*24*60*60*1000)); // 1 year expiry
+	let expires = "expires="+ d.toUTCString();
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) { // from w3schools
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
 }

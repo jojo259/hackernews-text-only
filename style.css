@@ -1,10 +1,14 @@
 :root {
 	--comment-indent-width: 16px;
+	--dark-mode-color-text: #ddd;
+	--dark-mode-color-bg: #001118;
+	--light-mode-color-text: #000;
+	--light-mode-color-bg: #fff;
 }
 
 body {
-	color: #ddd;
-	background: #001118;
+	color: var(--dark-mode-color-text);
+	background: var(--dark-mode-color-bg);
 	font-family: Arial;
 	font-size: 18px;
 }
@@ -49,6 +53,11 @@ a {
 
 .githublink {
 	float: right;
+}
+
+.darkmodetoggle {
+	float: right;
+	cursor: pointer;
 }
 
 /*
