@@ -114,40 +114,40 @@ function getCommentElem(curComment, atDepth) {
 	return commentDiv;
 }
 
-function openStory(curStory, scrollToHashComment = false) {
-	if (curStory.kids) {
-		commentsDiv.innerHTML = "";
-		appendComments(curStory.kids, commentsDiv.appendChild(document.createElement("div")), 0, scrollToHashComment)
-	}
-	else {
-		commentsDiv.innerHTML = "No comments.";
-	}
-	displayStory(curStory);
-	atStoryId = curStory.id;
-	updateHash();
-}
-
-function appendComments(kidIds, toElement, atDepth, scrollToHashComment = false) {
-	if (!kidIds) { return; };
-	for (let curKidId of kidIds.reverse()) { // reversed because changing from `appendChild` to `after` made the comments reversed idk why
-		let placeholderCommentDiv = document.createElement("div");
-		toElement.after(placeholderCommentDiv)
+function loadKidsOf(kidIds, ofDepth, ofElem, scrollToHashComment = false) {
+	for (let curKidId of kidIds.reverse()) {
 		getApi(`item/${curKidId}.json`).then(curComment => {
 			if (curComment.deleted) { return; };
 
-			let newCommentElem = getCommentElem(curComment, atDepth);
-			placeholderCommentDiv.replaceWith(newCommentElem);
+			let newCommentElem = getCommentElem(curComment, ofDepth);
+			ofElem.after(newCommentElem);
+			console.log(`added comment at depth ${ofDepth} by ${curComment.by}`);
+
+			if (curComment.kids) {
+				loadKidsOf(curComment.kids, ofDepth + 1, newCommentElem, scrollToHashComment)
+			}
+
 			if (scrollToHashComment && curKidId == atCommentId) {
 				setTimeout(function() { // delay to allow rendering to occur before scroll attempted (not really a robust solution)
 					newCommentElem.scrollIntoView();
 					console.log("scrolled to comment");
 				}, 1000);
 			}
-			console.log(`added comment at depth ${atDepth} by ${curComment.by}`);
-
-			appendComments(curComment.kids, newCommentElem, atDepth + 1, scrollToHashComment);
 		});
 	}
+}
+
+function openStory(curStory, scrollToHashComment = false) {
+	commentsDiv.innerHTML = "";
+	if (curStory.kids) {
+		loadKidsOf(curStory.kids, 0, commentsDiv, scrollToHashComment)
+	}
+	else {
+		storyTextDiv.innerHTML = "No comments.";
+	}
+	displayStory(curStory);
+	atStoryId = curStory.id;
+	updateHash();
 }
 
 function updateHash() {
