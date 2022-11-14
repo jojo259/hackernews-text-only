@@ -55,13 +55,18 @@ function loadMoreStories() {
 }
 
 function loadStories(storyFrom, storyTo) {
+	let getApiPromises = [];
 	for (let curStoryId of storiesArray.slice(storyFrom, storyTo)) {
-		getApi(`item/${curStoryId}.json`).then(curStory => {
+		getApiPromises.push(getApi(`item/${curStoryId}.json`));
+	}
+
+	Promise.all(getApiPromises).then(gotStories => {
+		for (let curStory of gotStories) {
 			let curStoryElem = getStoryElem(curStory);
 			storiesDiv.appendChild(curStoryElem);
 			console.log(`added story by ${curStory.by}`);
-		});
-	};
+		}
+	});
 }
 
 function displayStory(curStory) { // also probably not xss safe
