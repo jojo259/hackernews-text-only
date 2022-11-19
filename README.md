@@ -1,7 +1,9 @@
-# todo
+# Hacker News text only
 
-- make comments load depth-first rather than breadth-first
-- make page jump to comment from url hash
-- make comments stop loading at a certain depth and provide a link to view the rest
-- add a view more button to the bottom of the stories list
-- make story and comments positioning deterministic rather than dependent on request speeds
+[Hacker News](https://news.ycombinator.com/) text only, static site reskin, with dark and light mode
+
+## todo
+
+- make comments stop loading at a certain depth and provide a link to view the rest (as the real site does)
+- make page jump to comment from url hash (currently jumps to top-level parent of last hovered comment)
+- make comments load depth-first rather than breadth-first (low priority, currently loads with no preferred order which works fine)
