@@ -124,13 +124,13 @@ function getCommentElem(curComment, atDepth) {
 	return commentDiv;
 }
 
-function loadKidsOf(kidIds, ofDepth, ofElem, scrollToHashComment = false) {
-	for (let curKidId of kidIds.reverse()) {
-		getApi(`item/${curKidId}.json`).then(curComment => {
+async function loadKidsOf(kidIds, ofDepth, ofElem, scrollToHashComment = false) {
+	for (let curKidId of kidIds) {
+		await getApi(`item/${curKidId}.json`).then(curComment => {
 			if (curComment.deleted) { return; };
 
 			let newCommentElem = getCommentElem(curComment, ofDepth);
-			ofElem.after(newCommentElem);
+			ofElem.appendChild(newCommentElem);
 			console.log(`added comment at depth ${ofDepth} by ${curComment.by}`);
 
 			if (curComment.kids) {
@@ -264,7 +264,6 @@ function readHash() {
 }
 
 async function getApi(urlPath) {
-	console.log(window.localStorage)
 	let gotCacheStr = window.localStorage.getItem("cache-" + urlPath);
 	if (gotCacheStr != undefined) {
 		let gotCacheJson = JSON.parse(gotCacheStr);
