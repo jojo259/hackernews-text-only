@@ -9,6 +9,8 @@ let storiesPerLoad = 25;
 let atStoryId = 0;
 let atCommentId = 0;
 
+let openedStoryTime = 0;
+
 let commentIndexWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--comment-indent-width").replace("px", ""));
 
 let darkModeColorText = getComputedStyle(document.documentElement).getPropertyValue("--dark-mode-color-text");
@@ -126,17 +128,27 @@ function getCommentElem(curComment, atDepth) {
 	return commentDiv;
 }
 
-async function loadKidsOf(kidIds, ofDepth, ofElem, scrollToHashComment = false) {
+async function loadKidsOf(kidIds, ofStoryId, ofOpenTime, ofDepth, ofElem, scrollToHashComment = false) {
 	for (let curKidId of kidIds) {
 		await getApi(`item/${curKidId}.json`).then(curComment => {
 			if (curComment.deleted) { return; };
+
+			if (ofStoryId != atStoryId) { // prevent loading multiple stories' comments at once
+				console.log("wrong story id");
+				return;
+			}
+
+			if (ofOpenTime != openedStoryTime) { // prevent loading multiple sets of comments for the same story at once
+				console.log("wrong story opened time");
+				return;
+			}
 
 			let newCommentElem = getCommentElem(curComment, ofDepth);
 			ofElem.appendChild(newCommentElem);
 			console.log(`added comment at depth ${ofDepth} by ${curComment.by}`);
 
 			if (curComment.kids) {
-				loadKidsOf(curComment.kids, ofDepth + 1, newCommentElem, scrollToHashComment)
+				loadKidsOf(curComment.kids, ofStoryId, ofOpenTime, ofDepth + 1, newCommentElem, scrollToHashComment)
 			}
 
 			if (scrollToHashComment && curKidId == atCommentId) {
@@ -150,16 +162,19 @@ async function loadKidsOf(kidIds, ofDepth, ofElem, scrollToHashComment = false) 
 }
 
 function openStory(curStory, scrollToHashComment = false) {
+	displayStory(curStory);
+	atStoryId = curStory.id;
+	updateHash();
+
+	openedStoryTime = Date.now();
+
 	commentsDiv.innerHTML = "";
 	if (curStory.kids) {
-		loadKidsOf(curStory.kids, 0, commentsDiv, scrollToHashComment)
+		loadKidsOf(curStory.kids, atStoryId, openedStoryTime, 0, commentsDiv, scrollToHashComment)
 	}
 	else {
 		storyTextDiv.innerHTML = "No comments.";
 	}
-	displayStory(curStory);
-	atStoryId = curStory.id;
-	updateHash();
 }
 
 function updateHash() {
