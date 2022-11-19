@@ -4,7 +4,7 @@ console.log("running");
 
 let maxCacheMinutes = 5;
 
-let storiesPerLoad = 20;
+let storiesPerLoad = 25;
 
 let atStoryId = 0;
 let atCommentId = 0;
@@ -105,14 +105,16 @@ function getStoryElem(curStory) {
 function getCommentElem(curComment, atDepth) {
 	let commentDiv = document.createElement("div");
 
-	commentDiv.classList.add("comment");
 	commentDiv.id = "comment-" + curComment.id;
-	commentDiv.style.marginLeft = (atDepth + 1) * commentIndexWidth + "px";
+	commentDiv.classList.add("comment");
+	commentDiv.style.marginLeft = commentIndexWidth + "px";
 
 	commentDiv.onmouseover = function() {
 		atCommentId = curComment.id;
 		updateHash();
 	};
+
+	commentDiv.style.zIndex = atDepth.toString(); // doesn't work, onmouseover still only triggers on top-level comment
 
 	commentDiv.innerHTML += `<u>${curComment.by} ${prettyTimeStr(curComment.time)}</u>`; // also probably not xss safe but css is hard
 
