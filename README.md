@@ -8,3 +8,4 @@
 - make page jump to comment from url hash (currently jumps to top-level parent of last hovered comment due to issue with detecting which comment is being hovered)
 - make comments load depth-first (low priority, currently loads with no preferred order which works fine)
 - fix display of code blocks
+- fix local storage capacity issue
