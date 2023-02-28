@@ -79,13 +79,13 @@ function loadStories(storyFrom, storyTo) {
 function displayStory(curStory) { // also probably not xss safe
 	storyTitleDiv.innerHTML = curStory.title ? curStory.title : "notitle"; // HTML probably not necessary for titles
 	storyTitleDiv.href = curStory.url;
-	storyInfoDiv.innerText = getStoryInfo(curStory);
+	storyInfoDiv.innerHTML = getStoryInfo(curStory);
 	storyTextDiv.innerHTML = curStory.text ? curStory.text : "";
 	rightPaneDiv.scrollTop = 0;
 }
 
 function getStoryInfo(curStory) {
-	return `${curStory.score} points by ${curStory.by} ${prettyTimeStr(curStory.time)} | ${curStory.descendants ? curStory.descendants : "0"} comments`
+	return `${curStory.score} points by ${curStory.by} ${prettyTimeStr(curStory.time)} | <a href="https://news.ycombinator.com/item?id=${curStory.id}">${curStory.descendants ? curStory.descendants : "0"} comments</a>`;
 }
 
 function getStoryElem(curStory) {
@@ -99,7 +99,7 @@ function getStoryElem(curStory) {
 	};
 
 	storyDiv.innerText += curStory.title;
-	storyDiv.innerText += "\n" + getStoryInfo(curStory);
+	storyDiv.innerHTML += "<br>" + getStoryInfo(curStory);
 
 	return storyDiv;
 }
