@@ -1,5 +1,5 @@
 :root {
-	--comment-indent-width: 16px;
+	--comment-indent-width: 32px;
 	--dark-mode-color-text: #ddd;
 	--dark-mode-color-bg: #001118;
 	--light-mode-color-text: #000;
@@ -37,7 +37,6 @@ a:hover, a:visited, a:link, a:active {
 }
 
 .comment {
-	margin-right: 32px;
 	margin-top: 32px;
 	margin-bottom: 32px;
 }
@@ -59,6 +58,11 @@ a:hover, a:visited, a:link, a:active {
 .darkmodetoggle {
 	float: right;
 	cursor: pointer;
+}
+
+#commentscontainer {
+	margin-left: 0;
+	margin-right: var(--comment-indent-width);
 }
 
 /*

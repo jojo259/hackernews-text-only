@@ -22,7 +22,7 @@ let storiesDiv = document.getElementById("stories");
 let storyTitleDiv = document.getElementById("storytitle");
 let storyInfoDiv = document.getElementById("storyinfo");
 let storyTextDiv = document.getElementById("storytext");
-let commentsDiv = document.getElementById("comments");
+let commentsDiv = document.getElementById("commentscontainer");
 let rightPaneDiv = document.getElementById("rightpane");
 
 let curSortingType = "top";
