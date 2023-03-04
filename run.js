@@ -224,6 +224,10 @@ function prettyTimeStr(givenEpoch) {
 		timeWord = "month";
 		timeDiff /= 2678400;
 	}
+	else {
+		timeWord = "year";
+		timeDiff /= 31536000;
+	}
 
 	timeDiff = Math.floor(timeDiff);
 
