@@ -126,7 +126,7 @@ function getCommentElem(curComment, atDepth) {
 
 	commentDiv.style.zIndex = atDepth.toString(); // doesn't work, onmouseover still only triggers on top-level comment
 
-	commentDiv.innerHTML += `<u><a href="https://news.ycombinator.com/user?id=${curComment.by}">${curComment.by}</a> <span title="${new Date(curComment.time * 1000).toString()}">${prettyTimeStr(curComment.time)}</span></u>`; // also probably not xss safe but css is hard
+	commentDiv.innerHTML += `<u><a href="https://news.ycombinator.com/user?id=${curComment.by}">${curComment.by}</a> <a href="https://news.ycombinator.com/item?id=${curComment.id}"><span title="${new Date(curComment.time * 1000).toString()}">${prettyTimeStr(curComment.time)}</span></u></a>`; // also probably not xss safe but css is hard
 
 	let commentTextDiv = document.createElement("div");
 	commentTextDiv.style.marginTop = "4px";
